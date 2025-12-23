@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Heart Shell & Torus</title>
+    <title>AR Heart Fixed Rotation</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
         #video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 1.0; z-index: 0; }
@@ -25,7 +25,7 @@
         <div id="log">⏳ Đang đợi Camera...</div>
         <div class="section">👉 Tay Phải (Hình Dáng)</div>
         <div class="row"><span class="icon">☝️</span>1: Xoắn ốc</div>
-        <div class="row"><span class="icon">✌️</span>2: <b style="color:#ff3366">TRÁI TIM RỖNG 💓</b></div>
+        <div class="row"><span class="icon">✌️</span>2: <b style="color:#ff3366">TRÁI TIM (Đứng yên)</b></div>
         <div class="row"><span class="icon">🤟</span>3: Nguyên Tử</div>
         <div class="row"><span class="icon">🖖</span>4: <b style="color:#00BFFF">BÁNH DONUT 🍩</b></div>
         <div class="row"><span class="icon">🖐️</span>5: Hình Cầu</div>
@@ -122,7 +122,7 @@
                 // Spiral
                 const t2=i*0.06, r2=10+i*0.05; targets.spiral.push(r2*Math.cos(t2), (i*0.1)-300, r2*Math.sin(t2));
 
-                // --- HÌNH 4 NGÓN: TORUS (Bánh Donut) ---
+                // Torus
                 const u = Math.random() * Math.PI * 2;
                 const v = Math.random() * Math.PI * 2;
                 const R_torus = 250; 
@@ -133,21 +133,14 @@
                 targets.torus.push(x, y, z);
             }
 
-            // --- HÌNH TRÁI TIM RỖNG (Shell) ---
-            // Dùng công thức tham số + nhiễu Z để tạo thành vỏ dày thay vì khối đặc
+            // TRÁI TIM RỖNG (Shell)
             for(let i=0; i<P_COUNT; i++) {
                 const t = Math.random() * Math.PI * 2;
-                // Công thức viền trái tim
                 let hx = 16 * Math.pow(Math.sin(t), 3);
                 let hy = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
                 
-                // Thay vì lấp đầy bên trong, ta chỉ rải hạt xung quanh viền
-                // rSpread: Độ phân tán khỏi viền (độ dày của vỏ)
-                const rSpread = 0.8 + Math.random() * 0.4; // 0.8 đến 1.2
-                hx *= rSpread;
-                hy *= rSpread;
-
-                // Thêm độ sâu 3D
+                const rSpread = 0.8 + Math.random() * 0.4;
+                hx *= rSpread; hy *= rSpread;
                 const hz = (Math.random() - 0.5) * 40; 
 
                 const scale = 13;
@@ -246,16 +239,20 @@
             }
             particles.geometry.attributes.position.needsUpdate = true; particles.geometry.attributes.color.needsUpdate = true;
             
+            // LOGIC XOAY
             if (leftHandAction === 'none') {
                 if (activeTargetName === 'heart') {
-                    particles.rotation.y += 0.001; 
+                    // NẾU LÀ TIM: Tự động đưa về góc 0 (mặt chính diện) và DỪNG
+                    particles.rotation.y += (0 - particles.rotation.y) * 0.05;
+                    particles.rotation.x += (0 - particles.rotation.x) * 0.05;
                 } else {
+                    // Hình khác thì xoay bình thường
                     particles.rotation.y += 0.003;
                 }
                 
                 if (activeTargetName === 'torus') {
                     particles.rotation.x += 0.002;
-                } else {
+                } else if (activeTargetName !== 'heart') {
                     particles.rotation.x *= 0.95; 
                 }
             }
